@@ -6,10 +6,18 @@ class CarSerializer(serializers.ModelSerializer):
         model = Car
         fields = ['id', 'brand', 'model', 'registration_number', 'date_of_next_technical_examination']
 
+
+class MiniReservationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = ['id', 'booking_person', 'reservation_date_from', 'reservation_date_to']
+
+
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = ['reservating_person', 'reservation_date_from', 'reservation_date_to', 'booked_car']
+        fields = ['id', 'booking_person', 'reservation_date_from', 'reservation_date_to', 'booked_car']
+        depth = 1
 
 
 """
