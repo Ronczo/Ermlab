@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Car, Reservation
 
+
 class CarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
@@ -24,6 +25,3 @@ class ReservationWithDetailsSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ['id', 'booking_person', 'date_from', 'date_to', 'booked_car']
         depth = 1
-
-
-

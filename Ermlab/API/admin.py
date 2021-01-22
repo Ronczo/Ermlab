@@ -3,4 +3,3 @@ from .models import Car, Reservation
 
 admin.site.register(Car)
 admin.site.register(Reservation)
-
