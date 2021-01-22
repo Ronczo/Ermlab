@@ -31,21 +31,26 @@ class Reservation(models.Model):
         return [reservation for reservation in Reservation.objects.filter(booked_car=car)]
 
     @staticmethod
-    def is_period_valid(choosed_car, new_from, new_to):
+    def is_period_valid(choosed_car, new_from, new_to, reservation_to_miss=None):
         """
         The method checks if new reservation date dosen't collide with existing ones
         :param choosed_car: should be an object of class Car
         :param new_from: this is date when new reservation starts
         :param new_to: this is date when new reservation ends
+        :param reservation_to_miss: miss this reservation if exist
         """
 
         # Creates a list of tuples with dates of reservations
         dates_of_reservations = []
         for reservation in Reservation.get_reservations(choosed_car):
-            dates_of_reservations.append((reservation.date_from, reservation.date_to))
+            if reservation == reservation_to_miss:
+                continue
+            else:
+                dates_of_reservations.append((reservation.date_from, reservation.date_to))
 
-        # Converts string into datetime object
-        new_from = datetime.strptime(new_from, '%Y-%m-%dT%H:%M:%S%z') if not isinstance(new_from, datetime) else new_from
+        # Converts string into datetime object if needed
+        new_from = datetime.strptime(new_from, '%Y-%m-%dT%H:%M:%S%z') if not isinstance(new_from,
+                                                                                        datetime) else new_from
         new_to = datetime.strptime(new_to, '%Y-%m-%dT%H:%M:%S%z') if not isinstance(new_to, datetime) else new_to
 
         if choosed_car.date_of_next_technical_examination >= new_to.date():
@@ -61,3 +66,10 @@ class Reservation(models.Model):
                 return False
         else:
             return False
+
+    @staticmethod
+    def get_reason_of_error():
+        return "You can't put this reservation due to one of the followings reason: " \
+               "1) There is another reservation is this time " \
+               "2) Reservation ends earlier than starts! " \
+               "3) In this period car's technical examination is planned"

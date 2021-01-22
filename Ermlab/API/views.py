@@ -92,11 +92,7 @@ class ReservationList(APIView):
                 return Response(reservation_to_create, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("You can't post this reservation due to one of the followings reason: "
-                            "1) There is another reservation is this time "
-                            "2) Reservation ends earlier than starts! "
-                            "3) In this period car's technical examination is planned",
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(Reservation.get_reason_of_error(), status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ReservationDetails(APIView):
@@ -120,28 +116,23 @@ class ReservationDetails(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("You can't put this reservation due to one of the followings reason: "
-                            "1) There is another reservation is this time "
-                            "2) Reservation ends earlier than starts! "
-                            "3) In this period car's technical examination is planned",
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(Reservation.get_reason_of_error(), status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def patch(self, request, pk, pk2):
         car = get_object_or_404(Car, pk=pk)
         reservation = get_object_or_404(Reservation, pk=pk2)
         serializer = MiniReservationSerializer(reservation, data=request.data, partial=True)
 
-        if Reservation.is_period_valid(car, request.data['date_from'], request.data['date_to']):
+        new_from = request.data['date_from'] if 'date_from' in list(request.data.keys()) else reservation.date_from
+        new_to = request.data['date_to'] if 'date_to' in list(request.data.keys()) else reservation.date_to
+
+        if Reservation.is_period_valid(car, new_from, new_to, reservation):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response("You can't patch this reservation due to one of the followings reason: "
-                            "1) There is another reservation is this time "
-                            "2) Reservation ends earlier than starts! "
-                            "3) In this period car's technical examination is planned",
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response(Reservation.get_reason_of_error(), status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def delete(self, request, pk, pk2):
         reservation = get_object_or_404(Reservation, pk=pk2)
