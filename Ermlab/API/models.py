@@ -57,7 +57,8 @@ class Reservation(models.Model):
             if new_from <= new_to:
                 if dates_of_reservations:
                     for reservation in dates_of_reservations:
-                        if any(map(lambda x: reservation[0] <= x <= reservation[1], (new_from, new_to))):
+                        if any(map(lambda x: reservation[0] <= x <= reservation[1], (new_from, new_to))) or (
+                                new_from <= reservation[0] and new_to >= reservation[1]):
                             return False
                     return True
                 else:
